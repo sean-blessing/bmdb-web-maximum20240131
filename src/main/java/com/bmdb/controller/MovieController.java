@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.bmdb.db.MovieRepo;
 import com.bmdb.model.Movie;
@@ -25,13 +28,17 @@ public class MovieController {
 	@GetMapping("/{id}")
 	public Movie getMovieById(@PathVariable int id) {
 		Optional<Movie> m = movieRepo.findById(id);
-		//TODO Add null check for valid id
-		return m.get();
+		if (m.isPresent()) {
+			return m.get();
+		}
+		else {
+			throw new ResponseStatusException(
+					HttpStatus.NOT_FOUND, "Movie Not Found: id ["+id+"]");
+		}
 	}
 	
 	@PostMapping("")
 	public Movie addMovie(@RequestBody Movie movie) {
-		//TODO Check for existence by movie.getId() before save?
 		return movieRepo.save(movie);
 	}
 	
@@ -39,15 +46,23 @@ public class MovieController {
 	public Movie updateMovie(@PathVariable int id, @RequestBody Movie movie) {
 		Movie m = null;
 		if (id != movie.getId()) {
-			System.err.println("Movie id does not match path id.");
-			//TODO Return error to front end.
+			System.err.println("Movie id [" + movie.getId()+"] does not match path id["+id+"].");
+			throw new ResponseStatusException(
+					HttpStatus.BAD_REQUEST, "Movie Not Found");
 		}
 		else if (!movieRepo.existsById(id)) {
 			System.err.println("Movie does not exist for id: "+id);
-			//TODO Return error to front end.
+			throw new ResponseStatusException(
+					HttpStatus.NOT_FOUND, "Movie Not Found");
 		}
 		else {
-			m = movieRepo.save(movie);
+			try {
+				m = movieRepo.save(movie);
+			}
+			catch (Exception e) {
+				System.err.println(e);
+				throw e;
+			}
 		}
 		return m;
 	}
@@ -61,6 +76,9 @@ public class MovieController {
 		}
 		else {
 			System.err.println("Delete Error: No movie exists for id: "+id);
+			success = false;
+			throw new ResponseStatusException(
+					HttpStatus.NOT_FOUND, "Movie Not Found");
 		}
 		return success;
 	}
