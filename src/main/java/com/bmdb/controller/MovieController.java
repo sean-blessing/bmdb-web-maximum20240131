@@ -32,6 +32,7 @@ public class MovieController {
 			return m.get();
 		}
 		else {
+			System.err.println("Get Movie error: id ["+id+"] does not exist.");
 			throw new ResponseStatusException(
 					HttpStatus.NOT_FOUND, "Movie Not Found: id ["+id+"]");
 		}
