@@ -72,8 +72,14 @@ public class MovieController {
 	public boolean deleteMovie(@PathVariable int id) {
 		boolean success = false;
 		if (movieRepo.existsById(id)) {
-			movieRepo.deleteById(id);
-			success = true;
+			try {
+				movieRepo.deleteById(id);
+				success = true;
+			}
+			catch (Exception e) {
+				System.err.println("Delete Error: "+e);
+				throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error deleting Movie: "+e);
+			}
 		}
 		else {
 			System.err.println("Delete Error: No movie exists for id: "+id);
@@ -96,4 +102,5 @@ public class MovieController {
 		List<Movie> movies = movieRepo.findAllByRatingAndYearGreaterThan(rating, year);
 		return movies;	
 	}
+
 }

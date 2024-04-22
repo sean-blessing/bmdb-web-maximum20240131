@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.bmdb.db.CreditRepo;
 import com.bmdb.model.Credit;
+import com.bmdb.model.Movie;
 
 @CrossOrigin
 @RestController
@@ -63,6 +64,13 @@ public class CreditController {
 			System.err.println("Delete Error: No credit exists for id: "+id);
 		}
 		return success;
+	}
+	
+
+	@GetMapping("/by-movie/{movieId}")
+	public List<Credit> getCreditsByMovieId(@PathVariable int movieId) {
+		List<Credit> credits = creditRepo.getAllByMovieId(movieId);
+		return credits;
 	}
 
 }
